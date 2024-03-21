@@ -99,18 +99,18 @@ void loop()
   }
 
   //Wysłanie danych z czujnika natezenia dzwieku
-  // if(nowSoundLVL!=currentSoundLVL){
-  //   Serial.print("SoundSensorLM393:");
-  //   Serial.println(nowSoundLVL);
-  //   currentSoundLVL = nowSoundLVL;
-  // }
+  if(nowSoundLVL!=currentSoundLVL){
+    Serial.print("SoundSensorLM393:");
+    Serial.println(nowSoundLVL);
+    currentSoundLVL = nowSoundLVL;
+  }
 
   //Wysłanie danych z czujnika poziomu wody
-  if(nowWaterLVL!=currentWaterLVL){
-    Serial.print("WaterLVL:");
-    Serial.println(nowWaterLVL);
-    currentWaterLVL = nowWaterLVL;
-  }
+  // if(nowWaterLVL!=currentWaterLVL){
+  //   Serial.print("WaterLVL:");
+  //   Serial.println(nowWaterLVL);
+  //   currentWaterLVL = nowWaterLVL;
+  // }
 
   //Odebranie danych
   if (Serial.available()>0) {

@@ -5,26 +5,24 @@ import matplotlib.pyplot as plt
 from collections import deque
 from datetime import datetime
 
-SerialObj = serial.Serial('COM3') # COMxx   format on Windows
-                                   # ttyUSBx format on Linux
+SerialObj = serial.Serial('COM3') # opening the serial communication port in this example COM3
                                    
 SerialObj.baudrate = 9600  # set Baud rate to 9600
 SerialObj.bytesize = 8     # Number of data bits = 8
 SerialObj.parity   ='N'    # No parity
 SerialObj.stopbits = 1     # Number of Stop bits = 1
 
-SerialObj.timeout  = None  # Setting timeouts here No timeouts,waits forever
+SerialObj.timeout  = None  # Setting timeouts here No timeouts, waits forever
 
 time.sleep(3)
-
-# Funkcja map w C++ mapuje wartość z jednego zakresu na inny. 
+ 
 def map(value, in_min, in_max, out_min, out_max):
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 def adjustRGB(temperatura):
     tempMax = 27
     tempMin = 17
-    G = 0  # Stała wartość dla koloru zielonego
+    G = 0 
     R = 0
     B = 0
 
@@ -45,15 +43,15 @@ def adjustRGB(temperatura):
     return int(R),int(G),int(B)
 
 def extract_data_from_DHT11(data_string):
-    # Podziel ciąg znaków na części, rozdzielając go na podstawie znaku "|"
+    # Split the string into parts by the "|" character
     parts = data_string.split("|")
-    # Pierwsza część zawiera wilgotność i jej jednostkę
+    # The first part contains humidity and its unit
     humidity_part = parts[0].split(":")[1].strip()
-    # Wyodrębnij samą liczbę wilgotności, usuwając "%" i spacje
+    # Extract humidity by removing "%" and spaces
     humidity = int(humidity_part[:-3])
-    # Druga część zawiera temperaturę i jej jednostkę
+    # The second part contains temperature and its unit
     temperature_part = parts[1].strip()
-    # Wyodrębnij samą liczbę temperatury, usuwając "*C" i spacje
+    # Extract temperature value by removing "*C" and spaces
     temperature = int(temperature_part[:-2])
 
     return humidity, temperature
@@ -63,28 +61,28 @@ def extract_int_value_from_sensor(data_string):
     analogRead = parts[1].strip()
     return int(analogRead)
 
-# Inicjalizacja kolejki na dane i wykresu
-data_queue = deque(maxlen=100)  # kolejka przechowująca ostatnie 100 punktów danych
-time_queue = deque(maxlen=100)  # kolejka przechowująca czasowe znaczniki dla danych
-# plt.ion()  # Włącz tryb interaktywny Matplotlib
+# Initialize data and plot queue
+data_queue = deque(maxlen=100)  # Queue to store the last 100 data points
+time_queue = deque(maxlen=100)  # Queue to store time stamps for the data
+# plt.ion()  # Turn on Matplotlib interactive mode
 fig, ax = plt.subplots()
-line, = ax.plot(time_queue, data_queue, color='blue')  # utwórz linię na wykresie
-ax.set_ylim(0, 1000)
+line, = ax.plot(time_queue, data_queue, color='blue')  # Create a line on the plot
+ax.set_ylim(0, 1000)  # Set the y-axis limits for the plot
 
 def update_plot(new_data):
-    # Dodaj nowe dane i czas do kolejek
+    # Add new data and time to the queues
     data_queue.append(new_data)
     time_queue.append(datetime.now())
 
-    # Zaktualizuj dane na wykresie
+    # Update the plot data
     line.set_xdata(time_queue)
     line.set_ydata(data_queue)
 
-    # Dostosuj osie X i Y do nowych danych
+    # Adjust the X and Y axes to the new data
     ax.relim()
     ax.autoscale_view()
 
-    # Ponownie narysuj wykres
+    # Redraw the plot
     plt.draw()
     plt.pause(0.01)
 
@@ -112,13 +110,13 @@ try:
             SerialObj.write(SendString)
             
         if data.startswith("SoundSensorLM393"):
+            new_dataFun = extract_int_value_from_sensor(data)
+            update_plot(new_dataFun)
+        
+        if data.startswith("WaterLVL"):
             # new_dataFun = extract_int_value_from_sensor(data)
             # update_plot(new_dataFun)
             pass
-        
-        if data.startswith("WaterLVL"):
-            new_dataFun = extract_int_value_from_sensor(data)
-            update_plot(new_dataFun)
             
 except KeyboardInterrupt:
     pass
